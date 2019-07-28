@@ -1,0 +1,260 @@
+
+<html>
+<head>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script>
+		// edit this with your own apps
+		var launchPageConfig = {
+			"apps": [{
+				"icon": "https://uswest.appetize.io/images/sample-icon.png",
+				"iOS": {
+					"publicKey": "demo_phq04c56jnvrkg0bn9w5ep4m9r",
+					"languages": [{
+						"locale": "en_CA",
+						"language": "en",
+						"name": "English"
+					}, {
+						"locale": "fr_CA",
+						"language": "fr",
+						"iosKeyboard": "fr_CA@sw=QWERTY-Accents",
+						"name": "French"
+					}],
+					"devices": [{
+						"name": "Phone",
+						"type": "iphone8"
+					}, {
+						"name": "Tablet",
+						"type": "ipadair2"
+					}]
+				},
+				"Android": {
+					"publicKey": "demo_r0m5r98axtdhftx1hmmhq1c0m8",
+					"languages": [{
+						"language": "en_CA",
+						"name": "English"
+					}, {
+						"language": "fr_CA",
+						"name": "French"
+					}],
+					"devices": [{
+						"name": "Phone",
+						"type": "nexus5"
+					}, {
+						"name": "Tablet",
+						"type": "nexus9"
+					}]
+				}
+			}],
+			"options": {
+				"hidePasswords": true
+			}
+		};
+		
+		$( document ).ready(function() {
+			// list apps
+			var appElements = [];
+			for (var i = 0; i < launchPageConfig.apps.length; i++) {
+				appElements.push("<a onclick='selectApp(" + i + ");'><img src='" + launchPageConfig.apps[i].icon + "' class='launch-icon'/></a>");
+			}
+			$('#apps').empty();
+			$('#apps').append(appElements);
+			selectApp(0);
+		});
+		// select app, update platforms, devices, languages
+		var selectedApp = 0;
+		function selectApp(index) {
+			if (!sessionActive || confirm('This will restart your session. Do you want to continue?')) {
+				sessionActive = false;
+				console.log('selecting app ' + index);
+				selectedApp = index;
+				$('#apps .selected').removeClass('selected');
+				$($('#apps img')[selectedApp]).addClass('selected');
+			// create platform buttons
+			var platformElements = [];
+			if (launchPageConfig.apps[index].iOS)
+				platformElements.push("<a onclick=\"selectPlatform('iOS');\"><button type=\"button\" class=\"btn btn-info\">iOS</button></a>");
+			if (launchPageConfig.apps[index].Android)
+				platformElements.push("<a onclick=\"selectPlatform('Android');\"><button type=\"button\" class=\"btn btn-info\">Android</button></a>");
+			$('#platforms').empty();
+			$('#platforms').append(platformElements);
+			// select default platform
+			if (launchPageConfig.apps[index].iOS)
+				selectPlatform('iOS');
+			else if (launchPageConfig.apps[index].Android)
+				selectPlatform('Android');
+			}
+		}
+		var selectedPlatform;
+		function selectPlatform(platform) {
+			if (!sessionActive || confirm('This will restart your session. Do you want to continue?')) {
+				sessionActive = false;
+				$('#savescreenshot').hide();
+				$('#endsession').hide();
+				console.log('selecting platform ' + platform);
+				selectedPlatform = platform;
+				$('#platforms .selected').removeClass('selected');
+				$('#platforms .btn:contains("'+selectedPlatform+'")').addClass('selected');
+				var deviceElements = [];
+				if (launchPageConfig.apps[selectedApp][platform].devices && launchPageConfig.apps[selectedApp][selectedPlatform].devices.length > 0) {
+					for (var i = 0; i < launchPageConfig.apps[selectedApp][platform].devices.length; i++) {
+						var element = $(document.createElement('a'));
+						element.attr("onclick", "selectDevice(launchPageConfig.apps[selectedApp][selectedPlatform].devices["+i+"])");
+						element.append("<button type=\"button\" class=\"btn btn-info\">"+launchPageConfig.apps[selectedApp][selectedPlatform].devices[i].name+"</button>");
+						deviceElements.push(element);
+					}
+					$('#devices').empty();
+					$('#devices').append(deviceElements);
+					selectDevice(launchPageConfig.apps[selectedApp][selectedPlatform].devices[0]);
+				}
+				var languageElements = [];
+				if (launchPageConfig.apps[selectedApp][selectedPlatform].languages && launchPageConfig.apps[selectedApp][selectedPlatform].languages.length > 0) {
+					for (var i = 0; i < launchPageConfig.apps[selectedApp][selectedPlatform].languages.length; i++) {
+						var element = $(document.createElement('a'));
+						element.attr("onclick", "selectLanguage(launchPageConfig.apps[selectedApp][selectedPlatform].languages["+i+"])");
+						element.append("<button type=\"button\" class=\"btn btn-info\">"+launchPageConfig.apps[selectedApp][selectedPlatform].languages[i].name+"</button>");
+
+						languageElements.push(element);
+					}
+					$('#languages').empty();
+					$('#languages').append(languageElements);
+					selectLanguage(launchPageConfig.apps[selectedApp][selectedPlatform].languages[0]);
+				}
+			}
+		}
+		var selectedDevice;
+		function selectDevice(device) {
+			if (!sessionActive || confirm('This will restart your session. Do you want to continue?')) {
+				sessionActive = false;
+				$('#savescreenshot').hide();
+				$('#endsession').hide();
+				console.log('selecting device ' + device.type);
+				selectedDevice = device;
+				$('#devices .selected').removeClass('selected');
+				$('#devices .btn:contains("'+selectedDevice.name+'")').addClass('selected');
+				updateIframeSrcUrl();
+			}
+		}
+		var selectedLanguage = {};
+		function selectLanguage(language) {
+			if (!sessionActive || confirm('This will restart your session. Do you want to continue?')) {
+				sessionActive = false;
+				$('#savescreenshot').hide();
+				$('#endsession').hide();
+				console.log('selecting language ' + language.name);
+				selectedLanguage = language;
+				$('#languages .selected').removeClass('selected');
+				$('#languages .btn:contains("'+selectedLanguage.name+'")').addClass('selected');
+				updateIframeSrcUrl();
+			}
+		}
+		function updateIframeSrcUrl() {
+			var url = 'https://appetize.io/embed/' + launchPageConfig.apps[selectedApp][selectedPlatform].publicKey + '?deviceColor=white&centered=true&toast=top&xdocMsg=true&device=' + selectedDevice.type + '&language=' + selectedLanguage.language + '&locale=' + selectedLanguage.locale + '&iosKeyboard=' + selectedLanguage.iosKeyboard + '&hidePasswords=' + launchPageConfig.options.hidePasswords;
+			$('#app_iframe').attr('src', url);
+			iframe = document.querySelector('iframe');
+		}
+		$(document).on('input', '#slider', function() {
+			setScale( $(this).val()*100 );
+		});
+		// Sending messages to iframe from parent window
+		var iframe = document.querySelector('iframe');
+		function rotateLeft() {
+			iframe.contentWindow.postMessage('rotateLeft', '*');
+		}
+		function rotateRight() {
+			iframe.contentWindow.postMessage('rotateRight', '*');
+		}
+		function setScale(number) {
+			iframe.contentWindow.postMessage({
+				type: 'setScale',
+				value: number
+			}, '*');
+		}
+		function saveScreenshot() {
+			iframe.contentWindow.postMessage('saveScreenshot', '*');
+		}
+		function endSession() {
+			if (!sessionActive || confirm('This will restart your session. Do you want to continue?')) {
+				iframe.contentWindow.postMessage('endSession', '*');
+			}
+		}
+		// Receiving cross-document messages from iframe in parent window
+		var sessionActive;
+		var messageEventHandler = function(event) {
+			console.log(event.data);
+			if (event.data == 'appLaunch') {
+				sessionActive = true;
+				$('#savescreenshot').show();
+				$('#endsession').show();
+			} else if (event.data == 'sessionEnded') {
+				sessionActive = false;
+				$('#savescreenshot').hide();
+				$('#endsession').hide();
+			}
+		};
+		window.addEventListener('message', messageEventHandler, false);
+	</script>
+	<style>
+		body {
+			padding: 20px;
+		}
+		a {
+			cursor: pointer;
+		}
+		.launch-icon {
+			width: 50px;
+			border-radius: 5px;
+		}
+		button{
+			margin-bottom: 10px;
+		}
+		.toggles .btn:not(.selected),
+		.toggles img:not(.selected) {
+			opacity: .4;
+		}
+	</style>
+</head>
+<body>
+	<div class="">
+		<div style="padding-bottom: 40px;">
+			<img height="30" src="https://appetize.io/images/logo1_colored_tight_sm.png" alt="logo"> Appetize.io
+		</div>
+		<div class="row selection">
+			<div class="col-md-3">
+				<h5>
+					App
+				</h5>
+				<div id="apps" class="toggles"><a onclick="selectApp(0);"><img src="https://appetizeio-static.s3.amazonaws.com/sample-icon.png" class="launch-icon selected"></a></div>
+				<br>
+				<h5>
+					Platform
+				</h5>
+				<div id="platforms" class="toggles"><a onclick="selectPlatform(&#39;iOS&#39;);"><button type="button" class="btn btn-info selected">iOS</button></a><a onclick="selectPlatform(&#39;Android&#39;);"><button type="button" class="btn btn-info">Android</button></a></div>
+				<br>
+				<h5>
+					Device
+				</h5>
+				<div id="devices" class="toggles"><a onclick="selectDevice(launchPageConfig.apps[selectedApp][selectedPlatform].devices[0])"><button type="button" class="btn btn-info selected">Phone</button></a><a onclick="selectDevice(launchPageConfig.apps[selectedApp][selectedPlatform].devices[1])"><button type="button" class="btn btn-info">Tablet</button></a></div>
+				<br>
+				<h5>
+					Language
+				</h5>
+				<div id="languages" class="toggles"><a onclick="selectLanguage(launchPageConfig.apps[selectedApp][selectedPlatform].languages[0])"><button type="button" class="btn btn-info selected">English</button></a><a onclick="selectLanguage(launchPageConfig.apps[selectedApp][selectedPlatform].languages[1])"><button type="button" class="btn btn-info">French</button></a></div>
+				<br>
+				<h5>
+					Scale
+				</h5>
+				<input id="slider" style="max-width: 150px; display: inline-block;" type="range" min="0" value=".75" max="1" step=".05" onchange="setScale();">
+				<br><br>
+				<button style="display: none;" id="savescreenshot" type="button" class="btn btn-success" onclick="saveScreenshot()">Save screenshot</button>
+				<br><br>
+				<button style="display: none;" id="endsession" type="button" class="btn btn-danger" onclick="endSession();">End Session</button>
+				<br><br>
+			</div>
+			<div class="col-md-9">
+				<iframe id="app_iframe" width="900px" height="1300px" frameborder="0" scrolling="no" style="max-width: 100%;"></iframe>
+			</div>
+		</div>
+	</div>
+
+</body></html>
