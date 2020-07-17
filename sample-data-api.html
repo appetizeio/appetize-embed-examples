@@ -57,7 +57,7 @@
     (function (w, t, c, p, s, e) {
       p = new Promise(function (r) {
         w[c] = { client: function () { return p } };
-        s = document.createElement(t); s.async = 1; s.src = 'AppetizeIO.js';
+        s = document.createElement(t); s.async = 1; s.src = 'https://js.appetize.io/AppetizeIO.js';
         e = document.getElementsByTagName(t)[0]; e.parentNode.insertBefore(s, e);
         s.onload = function () { r(w[c]); };
       }); return p;
