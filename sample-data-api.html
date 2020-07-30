@@ -24,16 +24,17 @@
       console.log('AppetizeIO.js library is loaded');
 
       // get data
-      var user = await AppetizeIO.getUser();
       var loginUrl = await AppetizeIO.getLoginUrl();
-      var devices = await AppetizeIO.getDevices();
-      var apps = await AppetizeIO.getApps();
-
-      // display on page
-      document.getElementById('user').innerHTML = JSON.stringify(user, 0, 2);
       document.getElementById('loginUrl').innerHTML = JSON.stringify(loginUrl, 0, 2);
-      document.getElementById('devices').innerHTML = JSON.stringify(devices, 0, 2);
+
+      var user = await AppetizeIO.getUser();
+      document.getElementById('user').innerHTML = JSON.stringify(user, 0, 2);
+
+      var apps = await AppetizeIO.getApps();
       document.getElementById('apps').innerHTML = JSON.stringify(apps, 0, 2);
+
+      var devices = await AppetizeIO.getDevices();
+      document.getElementById('devices').innerHTML = JSON.stringify(devices, 0, 2);
     });
   });
   &lt;/script&gt;
