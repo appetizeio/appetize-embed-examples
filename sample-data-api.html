@@ -8,6 +8,7 @@
 <body>
   <h1>AppetizeIO.js example page</h1>
   <h3>Sample code</h3>
+  <p>Note: Please email hello@appetize.io to configure which targetOrigins are permitted to access this library.</p>
   <pre>
 &lt;script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"&gt;&lt;/script&gt;
 &lt;script&gt;
@@ -37,21 +38,20 @@
   });
   &lt;/script&gt;
   </pre>
-
-  <h3>AppetizeIO.getUser();</h3>
-  <pre id='user'>
-    Loading...
-  </pre>
   <h3>AppetizeIO.getLoginUrl();</h3>
   <pre id='loginUrl'>
     Loading...
   </pre>
-  <h3>AppetizeIO.getDevices();</h3>
-  <pre id='devices'>
+  <h3>AppetizeIO.getUser();</h3>
+  <pre id='user'>
     Loading...
   </pre>
   <h3>AppetizeIO.getApps();</h3>
   <pre id='apps'>
+    Loading...
+  </pre>
+  <h3>AppetizeIO.getDevices();</h3>
+  <pre id='devices'>
     Loading...
   </pre>
   <script>
@@ -67,16 +67,17 @@
         console.log('AppetizeIO.js library is loaded');
 
         // get data
-        var user = await AppetizeIO.getUser();
         var loginUrl = await AppetizeIO.getLoginUrl();
-        var devices = await AppetizeIO.getDevices();
-        var apps = await AppetizeIO.getApps();
-
-        // display on page
-        document.getElementById('user').innerHTML = JSON.stringify(user, 0, 2);
         document.getElementById('loginUrl').innerHTML = JSON.stringify(loginUrl, 0, 2);
-        document.getElementById('devices').innerHTML = JSON.stringify(devices, 0, 2);
+
+        var user = await AppetizeIO.getUser();
+        document.getElementById('user').innerHTML = JSON.stringify(user, 0, 2);
+
+        var apps = await AppetizeIO.getApps();
         document.getElementById('apps').innerHTML = JSON.stringify(apps, 0, 2);
+
+        var devices = await AppetizeIO.getDevices();
+        document.getElementById('devices').innerHTML = JSON.stringify(devices, 0, 2);
       });
     });
   </script>

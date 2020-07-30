@@ -1,4 +1,4 @@
-/* AppetizeIO.js library v0.0.2 */
+/* AppetizeIO.js library v0.0.4 */
 var baseUrl = 'https://appetize.io';
 var getIsLoadedInterval;
 
@@ -97,6 +97,9 @@ function resolveWhenReady(type, resolve) {
         if (event.data.type == type) {
             if (type === 'isLoaded') clearInterval(getIsLoadedInterval);
             resolve(event.data.data);
+        } else if (event.data.type == 'error') {
+            console.log(event.data.data);
+            clearInterval(getIsLoadedInterval);
         }
     };
     window.addEventListener('message', messageEventHandler, false);
