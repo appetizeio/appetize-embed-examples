@@ -1,0 +1,78 @@
+<html>
+
+<head>
+  <script>
+    // Sending messages to iframe from parent window
+    var iframe;
+    var restartInterval;
+    var heartbeatInterval;
+
+    function start() {
+      iframe = document.querySelector('iframe');
+      setTimeout(function () {
+        requestSession();
+      }, 500);
+
+      restartInterval = setInterval(function () {
+        endSession();
+        requestSession();
+      }, 5 * 60 * 1000); // 5 minutes
+
+      heartbeatInterval = setInterval(function () {
+        sendHeartbeat();
+      }, 30 * 1000); // 60 seconds
+    }
+
+
+    function requestSession() {
+      console.log('starting session');
+      iframe.contentWindow.postMessage('requestSession', '*');
+    }
+    function endSession() {
+      console.log('ending session');
+      iframe.contentWindow.postMessage('endSession', '*');
+    }
+    function sendHeartbeat() {
+      console.log('sending heartbeat');
+      iframe.contentWindow.postMessage('heartbeat', '*');
+    }
+
+
+    // Receiving messages from iframe in parent window
+    var messageEventHandler = function (event) {
+
+      // if(event.data == 'userInteractionReceived'){
+      //     console.log(event.data);
+      // }
+
+      // if(event.data == 'sessionRequested'){
+      //     console.log(event.data);
+      // }
+
+      // else if(event.data == 'userError'){
+      //     console.log(event.data);
+      // }
+
+      // else if(event.data == 'appLaunch'){
+      //     console.log(event.data);
+      // }
+
+      // else if(event.data == 'sessionEnded'){
+      //     console.log(event.data);
+      // }
+
+      // else
+      // 	console.log(event.data);
+
+    };
+
+    window.addEventListener('message', messageEventHandler, false);
+  </script>
+</head>
+
+<body>
+  <iframe onload="start()" width="100%" height="100%" frameborder="0" scrolling="no"
+    src="https://appetize.io/embed/demo_phq04c56jnvrkg0bn9w5ep4m9r?device=iphone7plus&scale=100&orientation=portrait&osVersion=13.7&deviceColor=white&centered=true&xdocMsg=true"></iframe>
+</body>
+
+</html>
