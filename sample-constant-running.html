@@ -2,25 +2,51 @@
 
 <head>
   <script>
-    // Sending messages to iframe from parent window
-    var iframe;
-    var restartInterval;
-    var heartbeatInterval;
+    // helper function
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
 
+    // query params
+    var publicKey = getUrlParameter('publicKey') || 'demo_phq04c56jnvrkg0bn9w5ep4m9r';
+    var device = getUrlParameter('device');
+    var scale = getUrlParameter('scale');
+    var osVersion = getUrlParameter('osVersion');
+    var deviceColor = getUrlParameter('deviceColor');
+    var centered = getUrlParameter('centered');
+    var orientation = getUrlParameter('orientation');
+    var heartbeatInterval = parseInt(getUrlParameter('heartbeatInterval')) || 30;
+    var restartInterval = parseInt(getUrlParameter('restartInterval')) || 5 * 60;
+
+    // start when DOM is interactive
+    var iframe;
+    document.onreadystatechange = function () {
+      if (document.readyState == "interactive") {
+        iframe = document.getElementById('myIframe');
+        iframe.src = 'https://appetize.io/embed/' + publicKey + '?device=' + device + '&scale=' + scale + '&orientation=' + orientation + '&osVersion=' + osVersion + '&deviceColor=' + deviceColor + '&centered=' + centered + '&xdocMsg=true';
+      }
+    }
+
+    // local variable to prevent start() from being called twice after iframe src dynamically updated
+    var started;
     function start() {
-      iframe = document.querySelector('iframe');
+      if (started) return;
+      started = true;
       setTimeout(function () {
         requestSession();
-      }, 500);
+      }, 1000);
 
-      restartInterval = setInterval(function () {
+      setInterval(function () {
         endSession();
         requestSession();
-      }, 5 * 60 * 1000); // 5 minutes
+      }, restartInterval * 1000);
 
-      heartbeatInterval = setInterval(function () {
+      setInterval(function () {
         sendHeartbeat();
-      }, 30 * 1000); // 60 seconds
+      }, heartbeatInterval * 1000);
     }
 
 
@@ -71,8 +97,7 @@
 </head>
 
 <body>
-  <iframe onload="start()" width="100%" height="100%" frameborder="0" scrolling="no"
-    src="https://appetize.io/embed/demo_phq04c56jnvrkg0bn9w5ep4m9r?device=iphone7plus&scale=100&orientation=portrait&osVersion=13.7&deviceColor=white&centered=true&xdocMsg=true"></iframe>
+  <iframe id="myIframe" onload="start(this)" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
 </body>
 
 </html>
