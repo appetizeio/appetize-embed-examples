@@ -21,6 +21,7 @@
     var codec = getUrlParameter('codec');
     var heartbeatInterval = parseInt(getUrlParameter('heartbeatInterval')) || 30;
     var restartInterval = parseInt(getUrlParameter('restartInterval')) || 5 * 60;
+    var refreshInterval = parseInt(getUrlParameter('refreshInterval')) || 24 * 60 * 60; // hard refresh page 1x per day
 
     // start when DOM is interactive
     var iframe;
@@ -48,6 +49,10 @@
       setInterval(function () {
         sendHeartbeat();
       }, heartbeatInterval * 1000);
+
+      setInterval(function () {
+        refreshPage()
+      }, refreshInterval * 1000);
     }
 
 
@@ -62,6 +67,10 @@
     function sendHeartbeat() {
       console.log('sending heartbeat');
       iframe.contentWindow.postMessage('heartbeat', '*');
+    }
+    function refreshPage() {
+      console.log('refreshing page');
+      window.location.reload();
     }
 
 
