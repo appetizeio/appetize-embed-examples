@@ -32,18 +32,26 @@
       }
     }
 
-    // local variable to prevent start() from being called twice after iframe src dynamically updated
-    var started;
+    var started; // local variable to prevent start() from being called twice after iframe src dynamically updated
+    var sessionActive = false; // if device is streaming
+    var restarting = false; // waiting for session to end before restarting
+
     function start() {
       if (started) return;
       started = true;
+
       setTimeout(function () {
         requestSession();
       }, 1000);
 
       setInterval(function () {
         endSession();
-        requestSession();
+
+        if (sessionActive) {
+          restarting = true;
+        } else {
+          requestSession();
+        }
       }, restartInterval * 1000);
 
       setInterval(function () {
@@ -51,55 +59,46 @@
       }, heartbeatInterval * 1000);
 
       setInterval(function () {
-        refreshPage()
+        refreshPage();
       }, refreshInterval * 1000);
     }
 
-
     function requestSession() {
-      console.log('starting session');
-      iframe.contentWindow.postMessage('requestSession', '*');
+      console.log("starting session");
+      iframe.contentWindow.postMessage("requestSession", "*");
     }
+
     function endSession() {
-      console.log('ending session');
-      iframe.contentWindow.postMessage('endSession', '*');
+      console.log("ending session");
+      iframe.contentWindow.postMessage("endSession", "*");
     }
     function sendHeartbeat() {
-      console.log('sending heartbeat');
-      iframe.contentWindow.postMessage('heartbeat', '*');
+      console.log("sending heartbeat");
+      iframe.contentWindow.postMessage("heartbeat", "*");
     }
     function refreshPage() {
-      console.log('refreshing page');
+      console.log("refreshing page");
       window.location.reload();
     }
 
-
     // Receiving messages from iframe in parent window
     var messageEventHandler = function (event) {
+      console.log(event.data);
 
-      // if(event.data == 'userInteractionReceived'){
-      //     console.log(event.data);
-      // }
-
-      // if(event.data == 'sessionRequested'){
-      //     console.log(event.data);
-      // }
-
-      // else if(event.data == 'userError'){
-      //     console.log(event.data);
-      // }
-
-      // else if(event.data == 'appLaunch'){
-      //     console.log(event.data);
-      // }
-
-      // else if(event.data == 'sessionEnded'){
-      //     console.log(event.data);
-      // }
-
-      // else
-      // 	console.log(event.data);
-
+      switch (event.data) {
+        case "sessionRequested":
+          restarting = false;
+          break;
+        case "appLaunch":
+          sessionActive = true;
+          break;
+        case "sessionEnded":
+          sessionActive = false;
+          if (restarting) {
+            requestSession();
+          }
+          break;
+      }
     };
 
     window.addEventListener('message', messageEventHandler, false);
